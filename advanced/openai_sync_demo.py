@@ -12,6 +12,7 @@ from openai.types.chat import (
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam
 )
+from openai.types.shared_params import ResponseFormatJSONObject
 import requests
 
 # 加载 .env 文件（默认查找当前目录的 .env）
@@ -323,6 +324,25 @@ def chat_with_tools(user_input: str) -> None:
         # LLM 认为不需要调用工具，直接回答
         print(f"直接回复: {message.content}")
 
+# ============================================================
+# 3. JSON 模式 —— 强制结构化输出
+# ============================================================
+def structured_output() -> dict:
+    """
+    使用 response_format 强制 LLM 返回 JSON。
+    Agent 中常用于：解析用户意图、结构化信息提取、数据分类。
+    """
+    response = client.chat.completions.create(
+        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        messages=[
+            ChatCompletionSystemMessageParam(role="system", content="你是一个助手，请用 JSON 格式回答。"),
+            ChatCompletionUserMessageParam(role="user", content="小明今年28岁，住在北京，是一名python工程师")
+        ],
+        # response_format={"type": "json_object"},
+        response_format=ResponseFormatJSONObject(type="json_object")
+    )
+    return json.loads(response.choices[0].message.content or "{}")
+
 
 if __name__ == "__main__":
     # help(simple_caht)
@@ -331,4 +351,7 @@ if __name__ == "__main__":
     # print(simple_caht())
 
     # 工具调用示例
-    print(chat_with_tools("济南天气如何？"))
+    # print(chat_with_tools("济南天气如何？"))
+
+    # JSON模式
+    print(structured_output())
