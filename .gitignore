@@ -11,3 +11,4 @@ wheels/
 
 advanced/.env
 langChain/.env
+*.env
