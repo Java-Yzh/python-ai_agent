@@ -76,6 +76,8 @@ async def streaming_chat_demo() -> None:
     """
     print("流式输出示例：")
 
+    # 这里的 stream 是 client.chat.completions.create(stream=True) 的返回值，类型是 AsyncStream[ChatCompletionChunk]。
+    # 它是一个异步迭代器，每次迭代会收到一个 ChatCompletionChunk 对象（即"一块"响应）。
     stream = await client.chat.completions.create(
         model=os.getenv("OPENAI_MODEL"),
         messages=[ChatCompletionUserMessageParam(role="user", content="请用三句话介绍 OpenAI 的历史")],
@@ -83,7 +85,34 @@ async def streaming_chat_demo() -> None:
     )
 
     # 逐块处理
+    # chunk示例：
+    # {
+    #     "id": "48c80dcd-8d8f-45c2-a14a-5f88145d322c",
+    #     "choices": [
+    #         {
+    #             "delta": {
+    #                 "content": "人工智能",
+    #                 "function_call": null,
+    #                 "refusal": null,
+    #                 "role": null,
+    #                 "tool_calls": null,
+    #                 "reasoning_content": null
+    #             },
+    #             "finish_reason": null,
+    #             "index": 0,
+    #             "logprobs": null
+    #         }
+    #     ],
+    #     "created": 1783072572,
+    #     "model": "deepseek-v4-flash",
+    #     "object": "chat.completion.chunk",
+    #     "moderation": null,
+    #     "service_tier": null,
+    #     "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402",
+    #     "usage": null
+    # }
     async for chunk in stream:
+        # print(chunk.model_dump_json(indent=2))
         # delta.content 是本次新增的文本片段
         if chunk.choices and chunk.choices[0].delta.content:
             print(chunk.choices[0].delta.content, end="", flush=True)
@@ -135,7 +164,7 @@ if __name__ == "__main__":
     # asyncio.run(parallel_models_demo())
 
     # 流式输出
-    # asyncio.run(streaming_chat_demo())
+    asyncio.run(streaming_chat_demo())
 
     # 带重试机制
-    asyncio.run(main())
+    # asyncio.run(main())
