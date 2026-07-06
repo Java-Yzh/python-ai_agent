@@ -84,7 +84,9 @@ def execute_tool_call(name: str, arguments: dict) -> str:
     return func(**arguments)
 
 # ── 3. ReAct 循环（核心） ─────────────────────
-
+# 每轮循环：调用 LLM → 将响应加入历史 → 检查是否有 tool_calls
+# 有 tool_calls → 逐个执行工具，把结果加入历史，进入下一轮
+# 无 tool_calls → content 即为最终回答，直接结束并输出即可
 def react_agent(user_input: str, max_steps: int = 10) -> None:
     messages = [
         {"role": "system", "content": "你是一个有用的助手，可以搜索信息和进行数学计算。"},
@@ -102,6 +104,12 @@ def react_agent(user_input: str, max_steps: int = 10) -> None:
         msg = response.choices[0].message
 
         # 把 LLM 的响应加入历史
+        # model_dump() 之后 — 普通 dict
+        # {
+        #     "role": "assistant",
+        #     "content": None,
+        #     "tool_calls": [{"id": "...", "function": {"name": "tavily_search", "arguments": "{...}"}}],
+        # }
         messages.append(msg.model_dump())
 
         # 如果 LLM 没有调工具 → 结束
