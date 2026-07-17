@@ -24,4 +24,8 @@ dependencies = [
     "tenacity>=9.1.4",
     "tiktoken>=0.13.0",
     "unstructured>=0.23.1",
+    "streamlit>=1.59.2",
+    "pandas-stubs~=3.0.3",
+    "matplotlib>=3.11.0",
+    "plotly>=6.9.0",
 ]
